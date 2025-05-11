@@ -1,15 +1,27 @@
+# 🗺️ Geofencing App 
 
-# GeoApp
+Aplicación Android de chat con amigos, utilizando los servicios de ubicación de Google Play y que detecta cuando el dispositivo entra/sale de zonas geográficas definidas (geovallas).
 
-Aplicación de chat entre amigos utilizando GeoVallas y el mapa
+## 📋 Requisitos
+- Android SDK 24+
+- Google Play Services 21+
+- Permisos de ubicación (en primer y segundo plano)
 
+## 🌟 Features
 
-## Features
+### Implementadas
+- ✅ Creación de geovallas circulares  
+- ✅ Notificaciones locales en tiempo real  
+- ✅ Deteccion de geovallas cercanas
 
-- Ejecución en segundo plano
-- Bajo consumo de energia
+### En desarrollo (Roadmap)
+- 🛠 Integración con Google Maps  
+- 🛠 Histórico de eventos en la nube  
+- 🛠 Modo de bajo consumo energético  
 
-
+### Futuras ideas
+- 🔍 Geovallas con formas personalizadas   
+- 👥 Geofencing colaborativo  
 
 ## Tech Stack
 
