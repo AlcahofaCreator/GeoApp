@@ -89,7 +89,7 @@ Aplicación de chat entre amigos utilizando GeoVallas y el mapa
 
 ### 1. Geofence Event Endpoint
 
-```http
+```
   POST /api/geofence/events
 ```
 
@@ -102,7 +102,7 @@ Aplicación de chat entre amigos utilizando GeoVallas y el mapa
 
 ### 2. Notification Service
 
-```http
+```
   POST /api/notifications
 ```
 
