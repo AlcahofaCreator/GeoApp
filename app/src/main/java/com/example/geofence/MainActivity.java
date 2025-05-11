@@ -120,9 +120,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
     }
-
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
@@ -165,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // BroadcastReceiver para manejar eventos de geovalla
+    // BroadcastReceiver
     public static class GeofenceBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
