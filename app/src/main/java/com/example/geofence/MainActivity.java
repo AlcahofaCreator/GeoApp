@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
@@ -24,6 +25,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private GeofencingClient geofencingClient;
+    private FusedLocationProviderClient fusedLocationClient;
     Geofence valla;
 
     private List<Geofence> geofenceList = new ArrayList<>();
@@ -39,17 +41,23 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         geofencingClient = LocationServices.getGeofencingClient(this);
         requestPermissions();
+
+
+
         Geofence.Builder builder = new Geofence.Builder();
 
+        fusedLocationClient.get
 
         builder.setRequestId("Valla");
         builder.setCircularRegion(valla.getLatitude(), valla.getLongitude(), 80);
         builder.setExpirationDuration(Geofence.NEVER_EXPIRE);
         builder.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
 
-        valla = builder.build();
+
 
     }
 
@@ -94,4 +102,5 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.ACCESS_COARSE_LOCATION
         });
     }
+
 }
