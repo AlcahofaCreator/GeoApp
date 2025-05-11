@@ -28,9 +28,10 @@ Aplicación de chat entre amigos utilizando GeoVallas y el mapa
 
 ### 1. Location Permissions
 
-```http
+```
   Runtime Permission Request
 ```
+
 
 | Permission | Description | Required For |
 |------------|-------------|--------------|
