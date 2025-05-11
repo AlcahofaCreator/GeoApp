@@ -3,6 +3,8 @@ package com.example.geofence;
 import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
+import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -77,10 +79,13 @@ public class MainActivity extends AppCompatActivity {
 
                             if (fineLocationGranted != null && fineLocationGranted) {
                                 // Precise location access granted.
+                                Toast.makeText(this, "Precise location access granted.", Toast.LENGTH_SHORT).show();
                             } else if (coarseLocationGranted != null && coarseLocationGranted) {
                                 // Only approximate location access granted.
+                                Toast.makeText(this, "Only approximate location access granted.", Toast.LENGTH_SHORT).show();
                             } else {
                                 // No location access granted.
+                                Toast.makeText(this, "Location access denied.", Toast.LENGTH_SHORT).show();
                             }
                         }
                 );
