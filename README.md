@@ -23,6 +23,8 @@ Aplicación Android de chat con amigos, utilizando los servicios de ubicación d
 - 🔍 Geovallas con formas personalizadas   
 - 👥 Geofencing colaborativo  
 
+
+
 ## Tech Stack
 
 **Client:** Java, XML, Android SDK 
