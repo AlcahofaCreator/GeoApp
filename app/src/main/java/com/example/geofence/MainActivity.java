@@ -69,12 +69,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
                             float radius = 80;
 
-                            //Construir geovalla
+                            // Construir geovalla
                             Geofence valla = new Geofence.Builder()
                                     .setRequestId("Valla_Principal")
                                     .setCircularRegion(latitude, longitude, radius)
@@ -85,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                                     )
                                     .build();
 
-
                             geofenceList.add(valla);
 
                             Toast.makeText(
@@ -94,8 +92,25 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT
                             ).show();
 
-                            // 5. Registrar la geovalla (requiere un PendingIntent)
-                            // geofencingClient.addGeofences(getGeofencingRequest(), pendingIntent);
+                            // Registrar la geovalla con PendingIntent
+                            if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                                geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast.makeText(MainActivity.this,
+                                                        "Geovalla registrada con éxito!",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(MainActivity.this,
+                                                    "Error al registrar geovalla: " + e.getMessage(),
+                                                    Toast.LENGTH_SHORT).show();
+                                        });
+                            }
                         } else {
                             Toast.makeText(
                                     MainActivity.this,
