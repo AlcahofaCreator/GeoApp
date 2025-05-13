@@ -6,11 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationRequest;
 import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
 import android.widget.Toast;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationRequest;
+
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -112,6 +115,16 @@ public class MainActivity extends AppCompatActivity {
                                         });
                             }
                         } else {
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Obteniendo ubicación actual...",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            // Forzar una nueva actualización de ubicación
+                            requestNewLocationData();
+
                             Toast.makeText(
                                     MainActivity.this,
                                     "Ubicación no disponible. Activa el GPS.",
@@ -121,12 +134,16 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
+
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofences(geofenceList);
         return builder.build();
     }
+
 
 
     private void requestPermissions() {
@@ -163,6 +180,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
     // BroadcastReceiver
     public static class GeofenceBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -196,6 +215,77 @@ public class MainActivity extends AppCompatActivity {
                 0,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+    }
+
+    private void requestNewLocationData() {
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+                .setWaitForAccurateLocation(false)
+                .setMinUpdateIntervalMillis(5000)
+                .setMaxUpdateDelayMillis(10000)
+                .build();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions();
+            return;
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        super.onLocationResult(locationResult);
+                        if (locationResult == null) {
+                            return;
+                        }
+
+                        Location location = locationResult.getLastLocation();
+                        if (location != null) {
+                            // Detener las actualizaciones para ahorrar batería
+                            fusedLocationClient.removeLocationUpdates(this);
+
+                            // Procesar la nueva ubicación
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            float radius = 80;
+
+                            // Construir geovalla
+                            Geofence valla = new Geofence.Builder()
+                                    .setRequestId("Valla_Principal")
+                                    .setCircularRegion(latitude, longitude, radius)
+                                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                                    .setTransitionTypes(
+                                            Geofence.GEOFENCE_TRANSITION_ENTER |
+                                                    Geofence.GEOFENCE_TRANSITION_EXIT
+                                    )
+                                    .build();
+
+                            geofenceList.add(valla);
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Geovalla creada con ubicación actualizada: " + latitude + ", " + longitude,
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            // Registrar la geovalla
+                            if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                                geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                                        .addOnSuccessListener(aVoid -> Toast.makeText(MainActivity.this,
+                                                "Geovalla registrada con éxito!",
+                                                Toast.LENGTH_SHORT).show())
+                                        .addOnFailureListener(e -> Toast.makeText(MainActivity.this,
+                                                "Error al registrar geovalla: " + e.getMessage(),
+                                                Toast.LENGTH_SHORT).show());
+                            }
+                        }
+                    }
+                },
+                getMainLooper()
         );
     }
 
