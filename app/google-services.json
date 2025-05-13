@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "186437182964",
+    "project_id": "bd-geoapp",
+    "storage_bucket": "bd-geoapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186437182964:android:1ed909585542bf122e05a1",
+        "android_client_info": {
+          "package_name": "com.example.geofence"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186437182964-s0kg2jrhf7mpg43vc6kong0tlihaqc2r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2TmP-3Sm5Jce1t_98zeCBjta4IbahVt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186437182964-s0kg2jrhf7mpg43vc6kong0tlihaqc2r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

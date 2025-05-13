@@ -1,5 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
+
+    id("com.google.gms.google-services") version "4.4.2" apply false
+
 }
 
 android {
@@ -32,6 +35,9 @@ android {
 }
 
 dependencies {
+
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
     implementation(libs.appcompat)
     implementation(libs.material)

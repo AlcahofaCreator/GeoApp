@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                                     MainActivity.this,
                                     "Ubicación no disponible. Activa el GPS.",
                                     Toast.LENGTH_SHORT
-                            ).show();
+                         ).show();
                         }
                     }
                 });
