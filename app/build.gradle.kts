@@ -2,17 +2,17 @@ plugins {
     alias(libs.plugins.android.application)
 
     id("com.google.gms.google-services") version "4.4.2" apply false
-
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
     namespace = "com.example.geofence"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.geofence"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -33,6 +33,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
+buildscript {
+    dependencies {
+        // Dependencia del plugin (¡debe estar aquí!)
+        classpath (libs.gradle)
+        classpath(libs.secrets.gradle.plugin)
+          }
+}
 
 dependencies {
 
@@ -48,4 +55,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-}
+
+
+
+    }
+
