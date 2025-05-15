@@ -7,10 +7,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationCallback;
@@ -21,6 +23,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -46,6 +50,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GeofencingClient geofencingClient;
     private FusedLocationProviderClient fusedLocationClient;
-
+    private Circle currentGeofenceCircle;
     private GoogleMap map;
 
     private List<Geofence> geofenceList = new ArrayList<>();
@@ -358,14 +363,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         enableMyLocation();
-        LatLng ubicacionInicial = new LatLng(28.5, -103);
+        getDeviceLocationAndMoveCamera();
 
-        googleMap.addMarker(new MarkerOptions()
-                .position(ubicacionInicial)
-                .title("Marker"));
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionInicial, 15));
     }
+
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
@@ -386,6 +387,66 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
+        }
+
+
+    }
+
+    private void getDeviceLocationAndMoveCamera() {
+        /*
+         * Obtiene la mejor y más reciente ubicación del dispositivo, que puede ser nula en raras
+         * ocasiones cuando la ubicación no está disponible.
+         */
+        try {
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                            Manifest.permission.ACCESS_COARSE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                Task<Location> locationResult = fusedLocationClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Establece la posición de la cámara del mapa en la ubicación actual del dispositivo.
+                        Location lastKnownLocation = task.getResult();
+                        if (lastKnownLocation != null) {
+                            LatLng currentLatLng = new LatLng(lastKnownLocation.getLatitude(),
+                                    lastKnownLocation.getLongitude());
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                    currentLatLng, 15));
+
+                            CircleOptions circleOptions = new CircleOptions()
+                                    .center(currentLatLng)
+                                    .radius(80) // Radio en metros
+                                    .strokeColor(Color.argb(255, 0, 100, 255))
+                                    .fillColor(Color.argb(64, 0, 100, 255))
+                                    .strokeWidth(4f);
+
+                            map.addCircle(circleOptions);
+
+                        } else {
+
+                            Log.d("MapDebug", "No se obtuvo la ubicación actual.");
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(28.5, -103), 5));
+
+                            Toast.makeText(this, "No se pudo obtener la ubicación actual. Mostrando ubicación predeterminada.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Log.d("MapDebug", "Current location is null. Using defaults.");
+                        Log.e("MapDebug", "Exception: %s", task.getException());
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(28.5, -103), 5)); // Ubicación predeterminada
+                        map.getUiSettings().setMyLocationButtonEnabled(false);
+                        Toast.makeText(this, "Error al obtener la ubicación.", Toast.LENGTH_LONG).show();
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Permiso de ubicación no concedido. Mostrando ubicación predeterminada.", Toast.LENGTH_LONG).show();
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage(), e);
+
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(28.5, -103), 5));
         }
     }
 }
