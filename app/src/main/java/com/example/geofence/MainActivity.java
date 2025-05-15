@@ -14,6 +14,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationRequest;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -50,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private List<Geofence> geofenceList = new ArrayList<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,13 +152,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
     }
 
-    //ON MAP READY
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));
-    }
+
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
@@ -312,4 +306,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         );
     }
 
+    //ON MAP READY
+    @Override
+    public void onMapReady(GoogleMap googleMap){
+
+
+        LatLng ubicacionInicial = new LatLng(28.5, -103);
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(ubicacionInicial)
+                .title("Marker"));
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionInicial, 15));
+    }
 }
