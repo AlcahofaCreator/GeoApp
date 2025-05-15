@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
 import android.widget.Toast;
+
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationRequest;
@@ -26,10 +27,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -49,10 +52,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
     private GeofencingClient geofencingClient;
     private FusedLocationProviderClient fusedLocationClient;
 
-
+    private GoogleMap map;
 
     private List<Geofence> geofenceList = new ArrayList<>();
 
@@ -75,13 +80,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
 
-
-
         requestPermissions();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         geofencingClient = LocationServices.getGeofencingClient(this);
-
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -150,12 +152,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     MainActivity.this,
                                     "Ubicación no disponible. Activa el GPS.",
                                     Toast.LENGTH_SHORT
-                         ).show();
+                            ).show();
                         }
                     }
                 });
     }
-
 
 
     private GeofencingRequest getGeofencingRequest() {
@@ -164,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.addGeofences(geofenceList);
         return builder.build();
     }
-
 
 
     private void requestPermissions() {
@@ -198,7 +198,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         permissionRequest.launch(permissions.toArray(new String[0]));
     }
-
 
 
     // BroadcastReceiver
@@ -351,9 +350,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //ON MAP READY
     @Override
-    public void onMapReady(GoogleMap googleMap){
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+
+        map = googleMap;
+        map.setOnMyLocationButtonClickListener((GoogleMap.OnMyLocationButtonClickListener) this);
+        map.setOnMyLocationClickListener((GoogleMap.OnMyLocationClickListener) this);
 
 
+        enableMyLocation();
         LatLng ubicacionInicial = new LatLng(28.5, -103);
 
         googleMap.addMarker(new MarkerOptions()
@@ -361,5 +365,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title("Marker"));
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionInicial, 15));
+    }
+
+    private void enableMyLocation() {
+        // 1. Check if permissions are granted, if so, enable the my location layer
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            map.setMyLocationEnabled(true);
+        }
     }
 }
