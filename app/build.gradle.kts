@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-
-    id("com.google.gms.google-services") version "4.4.2" apply false
+    id("com.google.gms.google-services") // ✅ sin apply false
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
@@ -67,6 +66,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
+    implementation(libs.firebase.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
