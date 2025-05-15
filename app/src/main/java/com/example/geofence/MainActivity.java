@@ -55,6 +55,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -63,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle currentGeofenceCircle;
     private GoogleMap map;
-
     private List<Geofence> geofenceList = new ArrayList<>();
 
     @Override
@@ -83,10 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
-
-
         requestPermissions();
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         geofencingClient = LocationServices.getGeofencingClient(this);
 
@@ -163,6 +160,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
     }
 
+    //ON MAP READY
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        map = googleMap;
+        map.setOnMyLocationButtonClickListener( this);
+        map.setOnMyLocationClickListener(this);
+
+        requestPermissions();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        map.setMyLocationEnabled(true);
+    }
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+
+        return false;
+    }
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
@@ -203,7 +219,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         permissionRequest.launch(permissions.toArray(new String[0]));
     }
-
 
     // BroadcastReceiver
     public static class GeofenceBroadcastReceiver extends BroadcastReceiver {
