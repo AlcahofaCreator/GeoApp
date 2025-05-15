@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
 import android.widget.Toast;
+
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationRequest;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
@@ -43,13 +45,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener,OnMapReadyCallback {
 
     private GeofencingClient geofencingClient;
     private FusedLocationProviderClient fusedLocationClient;
-
-
-
+    private GoogleMap map;
     private List<Geofence> geofenceList = new ArrayList<>();
 
     @Override
@@ -70,14 +70,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
-
-
-
-        requestPermissions();
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         geofencingClient = LocationServices.getGeofencingClient(this);
-
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -146,13 +140,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     MainActivity.this,
                                     "Ubicación no disponible. Activa el GPS.",
                                     Toast.LENGTH_SHORT
-                         ).show();
+                            ).show();
                         }
                     }
                 });
     }
 
+    //ON MAP READY
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        map = googleMap;
+        map.setOnMyLocationButtonClickListener( this);
+        map.setOnMyLocationClickListener(this);
 
+        requestPermissions();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        map.setMyLocationEnabled(true);
+    }
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+
+        return false;
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+    }
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
@@ -160,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.addGeofences(geofenceList);
         return builder.build();
     }
-
 
 
     private void requestPermissions() {
@@ -195,8 +211,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
         });
-    }
 
+
+    }
 
 
     // BroadcastReceiver
@@ -306,17 +323,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         );
     }
 
-    //ON MAP READY
-    @Override
-    public void onMapReady(GoogleMap googleMap){
 
-
-        LatLng ubicacionInicial = new LatLng(28.5, -103);
-
-        googleMap.addMarker(new MarkerOptions()
-                .position(ubicacionInicial)
-                .title("Marker"));
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionInicial, 15));
-    }
 }

@@ -28,6 +28,7 @@ public class Login extends AppCompatActivity {
     Button logButton;
     FirebaseAuth mAuth;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
