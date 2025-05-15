@@ -55,7 +55,6 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -64,7 +63,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle currentGeofenceCircle;
     private GoogleMap map;
+
     public int radio = 100;
+
     private List<Geofence> geofenceList = new ArrayList<>();
 
     @Override
@@ -84,7 +85,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+
         requestPermissions();
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         geofencingClient = LocationServices.getGeofencingClient(this);
 
@@ -161,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
     }
 
-    //ON MAP READY
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
@@ -202,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         permissionRequest.launch(permissions.toArray(new String[0]));
     }
+
 
     // BroadcastReceiver
     public static class GeofenceBroadcastReceiver extends BroadcastReceiver {
