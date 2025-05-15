@@ -20,6 +20,7 @@
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:src="@drawable/user"
             android:layout_marginBottom="50dp">
 
         </ImageView>
@@ -30,6 +31,7 @@
             android:layout_height="wrap_content"
             android:hint="Correo"
             android:padding="9dp"
+            android:background="@drawable/rounded_edittext"
             android:layout_marginBottom="12dp"
             android:textAlignment="center" />
 
@@ -40,6 +42,7 @@
             android:hint="Contraseña"
             android:padding="9dp"
             android:inputType="textPassword"
+            android:background="@drawable/rounded_edittext"
             android:layout_marginBottom="50dp"
             android:textAlignment="center" />
 
