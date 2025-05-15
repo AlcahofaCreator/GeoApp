@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle currentGeofenceCircle;
     private GoogleMap map;
+    public int radio = 100;
     private List<Geofence> geofenceList = new ArrayList<>();
 
     @Override
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (location != null) {
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
-                            float radius = 80;
+                            float radius = radio;
 
                             // Construir geovalla
                             Geofence valla = new Geofence.Builder()
@@ -310,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Procesar la nueva ubicación
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
-                            float radius = 80;
+                            float radius = radio;
 
                             // Construir geovalla
                             Geofence valla = new Geofence.Builder()
@@ -415,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             CircleOptions circleOptions = new CircleOptions()
                                     .center(currentLatLng)
-                                    .radius(80) // Radio en metros
+                                    .radius(radio) // Radio en metros
                                     .strokeColor(Color.argb(255, 0, 100, 255))
                                     .fillColor(Color.argb(64, 0, 100, 255))
                                     .strokeWidth(4f);
