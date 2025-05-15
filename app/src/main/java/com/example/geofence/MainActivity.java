@@ -1,5 +1,7 @@
 package com.example.geofence;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +28,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -164,48 +168,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void requestPermissions() {
+        ActivityResultLauncher<String[]> permissionRequest =
+                registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                    Boolean fineLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+                    Boolean coarseLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                    Boolean notificationGranted = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                            ? result.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false)
+                            : true; // No necesario para versiones anteriores
 
-        ActivityResultLauncher<String[]> locationPermissionRequest =
-                registerForActivityResult(new ActivityResultContracts
-                                .RequestMultiplePermissions(), result -> {
+                    if (fineLocationGranted) {
+                        Toast.makeText(this, "Precise location access granted.", Toast.LENGTH_SHORT).show();
+                    } else if (coarseLocationGranted) {
+                        Toast.makeText(this, "Only approximate location access granted.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Location access denied.", Toast.LENGTH_SHORT).show();
+                    }
 
-                            Boolean fineLocationGranted = null;
-                            Boolean coarseLocationGranted = null;
+                    if (!notificationGranted) {
+                        Toast.makeText(this, "Permiso de notificaciones denegado.", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                fineLocationGranted = result.getOrDefault(
-                                        Manifest.permission.ACCESS_FINE_LOCATION, false);
-                                coarseLocationGranted = result.getOrDefault(
-                                        Manifest.permission.ACCESS_COARSE_LOCATION, false);
-                            }
+        List<String> permissions = new ArrayList<>();
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS);
+        }
 
-                            if (fineLocationGranted != null && fineLocationGranted) {
-                                // Precise location access granted.
-                                Toast.makeText(this, "Precise location access granted.", Toast.LENGTH_SHORT).show();
-                            } else if (coarseLocationGranted != null && coarseLocationGranted) {
-                                // Only approximate location access granted.
-                                Toast.makeText(this, "Only approximate location access granted.", Toast.LENGTH_SHORT).show();
-                            } else {
-                                // No location access granted.
-                                Toast.makeText(this, "Location access denied.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                );
-        locationPermissionRequest.launch(new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-        });
+        permissionRequest.launch(permissions.toArray(new String[0]));
     }
 
 
 
     // BroadcastReceiver
     public static class GeofenceBroadcastReceiver extends BroadcastReceiver {
+        private static final String CHANNEL_ID = "geofence_channel";
+
         @Override
         public void onReceive(Context context, Intent intent) {
             GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
             if (geofencingEvent.hasError()) {
-                Toast.makeText(context, "Error en geovalla: " + geofencingEvent.getErrorCode(), Toast.LENGTH_SHORT).show();
+                sendNotification(context, "Error en geovalla: " + geofencingEvent.getErrorCode());
                 return;
             }
 
@@ -221,7 +225,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     break;
             }
 
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            sendNotification(context, message);
+        }
+
+        private void sendNotification(Context context, String message) {
+            createNotificationChannel(context);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(android.R.drawable.ic_dialog_map) // Puedes cambiar el ícono
+                    .setContentTitle("Geovalla")
+                    .setContentText(message)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build()); // ID único
+        }
+
+        private void createNotificationChannel(Context context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CharSequence name = "Canal de Geovalla";
+                String description = "Notificaciones de entrada y salida de zonas geográficas";
+                int importance = NotificationManager.IMPORTANCE_HIGH;
+                NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+                channel.setDescription(description);
+
+                NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+                if (notificationManager != null) {
+                    notificationManager.createNotificationChannel(channel);
+                }
+            }
         }
     }
 
