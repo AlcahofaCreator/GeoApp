@@ -214,6 +214,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onReceive(Context context, Intent intent) {
             GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+
+            if (geofencingEvent == null) {
+                Log.e("GeofenceReceiver", "GeofencingEvent is null");
+                return;
+            }
+
             if (geofencingEvent.hasError()) {
                 sendNotification(context, "Error en geovalla: " + geofencingEvent.getErrorCode());
                 return;
@@ -229,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 case Geofence.GEOFENCE_TRANSITION_EXIT:
                     message = "Saliste de la zona";
                     break;
+                default:
+                    message = "Transición desconocida";
             }
 
             sendNotification(context, message);
