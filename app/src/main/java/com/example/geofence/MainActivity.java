@@ -15,6 +15,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationCallback;
@@ -79,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    ImageView chats;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +94,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
             return insets;
+        });
+
+        chats = findViewById(R.id.chats);
+
+        chats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Segunda.class);
+                startActivity(intent);
+            }
         });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

@@ -19,6 +19,9 @@
         android:theme="@style/Theme.GEOfence"
         tools:targetApi="31">
         <activity
+            android:name=".Segunda"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" />
 
@@ -38,8 +41,8 @@
             android:exported="false" />
 
         <receiver
-            android:exported="true"
-            android:name=".MainActivity$GeofenceBroadcastReceiver"/>
+            android:name=".MainActivity$GeofenceBroadcastReceiver"
+            android:exported="true" />
 
         <activity
             android:name=".Login"
