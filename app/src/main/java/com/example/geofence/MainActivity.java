@@ -499,27 +499,61 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(28.5, -103), 5));
         }
     }
+    private void actualizarLocalizaciones() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String myUid = currentUser != null ? currentUser.getUid() : "";
 
-    private void actualizarLocalizaciones(){
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("usuarios")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        if (doc.getId().equals(myUid)) continue; // Saltar tu propio documento
+
                         Double lat = doc.getDouble("lat");
                         Double lng = doc.getDouble("long");
 
                         if (lat != null && lng != null) {
                             LatLng pos = new LatLng(lat, lng);
+
+                            // 🔵 Marcador del otro usuario
                             map.addMarker(new MarkerOptions()
                                     .position(pos)
-                                    .title("Usuario: " + doc.getId())); // Puedes cambiar el texto
+                                    .title("Usuario: " + doc.getId()));
+
+                            // 🔵 Círculo estilo geovalla original (azul)
+                            CircleOptions circleOptions = new CircleOptions()
+                                    .center(pos)
+                                    .radius(radio) // mismo radio de la geovalla
+                                    .strokeColor(Color.argb(255, 0, 100, 255))       // azul fuerte
+                                    .fillColor(Color.argb(64, 0, 100, 255))          // azul transparente
+                                    .strokeWidth(4f);
+
+                            map.addCircle(circleOptions);
+
+                            // 🔵 Geovalla para otro usuario
+                            Geofence valla = new Geofence.Builder()
+                                    .setRequestId("user_" + doc.getId())
+                                    .setCircularRegion(lat, lng, radio)
+                                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                                    .setTransitionTypes(
+                                            Geofence.GEOFENCE_TRANSITION_ENTER |
+                                                    Geofence.GEOFENCE_TRANSITION_EXIT)
+                                    .build();
+
+                            geofenceList.add(valla);
                         }
                     }
-                })
-                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener usuarios: " + e.getMessage()));
 
+                    // 🟢 Registra TODAS las geovallas de los otros usuarios
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                                .addOnSuccessListener(aVoid ->
+                                        Log.d("Geofence", "Geovallas de otros usuarios registradas"))
+                                .addOnFailureListener(e ->
+                                        Log.e("Geofence", "Error al registrar geovallas: " + e.getMessage()));
+                    }
+                });
     }
 
 }
