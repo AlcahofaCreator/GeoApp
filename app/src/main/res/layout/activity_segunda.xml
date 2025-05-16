@@ -5,9 +5,9 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    android:orientation="vertical"
     android:background="@color/white"
-    android:orientation="vertical">
+    tools:context=".Segunda">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_marginStart="29dp"
-                android:text="MAPA">
+                android:text="CHATS">
             </TextView>
 
             <View
@@ -65,19 +65,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="630dp"
+            android:gravity="center"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <androidx.fragment.app.FragmentContainerView
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:id="@+id/map"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-            </FrameLayout>
+            <ListView
+                android:id="@+id/LV"
+                android:layout_width="match_parent"
+                android:layout_height="400dp">
+            </ListView>
 
         </LinearLayout>
 
