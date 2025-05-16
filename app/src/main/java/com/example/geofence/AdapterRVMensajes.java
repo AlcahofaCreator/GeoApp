@@ -40,8 +40,8 @@ public class AdapterRVMensajes extends RecyclerView.Adapter<AdapterRVMensajes.Me
 
     class MensajeHolder extends RecyclerView.ViewHolder {
 
-        private TextView mensaje;
-        private TextView nombre;
+        private final TextView mensaje;
+        private final TextView nombre;
         public MensajeHolder(@NonNull View itemView) {
             super(itemView);
             mensaje = itemView.findViewById(R.id.mensaje);

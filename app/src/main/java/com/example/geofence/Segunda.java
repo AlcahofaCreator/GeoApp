@@ -2,11 +2,13 @@ package com.example.geofence;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -19,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -56,36 +59,69 @@ public class Segunda extends AppCompatActivity {
         mensaje = findViewById(R.id.mensaje);
         send = findViewById(R.id.send);
 
-        rVmensajes.findViewById(R.id.rvMensajes);
+        rVmensajes = findViewById(R.id.rvMensajes);
 
         rVmensajes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rVmensajes.setAdapter(mAdapterRVMensajes);
         rVmensajes.setHasFixedSize(true);
 
-        FirebaseFirestore.getInstance().collection("chat").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                for (DocumentChange mDocumentChange : queryDocumentSnapshots.getDocumentChanges()){
-                    if (mDocumentChange.getType() == DocumentChange.Type.ADDED){
-                        lstMensajes.add(mDocumentChange.getDocument().toObject(MensajeVO.class));
-                        mAdapterRVMensajes.notifyDataSetChanged();
-                        rVmensajes.smoothScrollToPosition(lstMensajes.size());
+        FirebaseFirestore.getInstance().collection("chat")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots,
+                                        @Nullable FirebaseFirestoreException error) {
+
+                        // 1. Primero verifica si hay error
+                        if (error != null) {
+                            Log.e("Firestore error", error.getMessage());
+                            return;
+                        }
+
+                        // 2. Luego verifica si queryDocumentSnapshots es null
+                        if (queryDocumentSnapshots == null) {
+                            Log.d("Firestore", "No hay documentos");
+                            return;
+                        }
+
+                        // 3. Solo entonces procesa los cambios
+                        for (DocumentChange mDocumentChange : queryDocumentSnapshots.getDocumentChanges()) {
+                            if (mDocumentChange.getType() == DocumentChange.Type.ADDED) {
+                                lstMensajes.add(mDocumentChange.getDocument().toObject(MensajeVO.class));
+                                mAdapterRVMensajes.notifyDataSetChanged();
+                                rVmensajes.smoothScrollToPosition(lstMensajes.size());
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String mensajeTexto = mensaje.getText().toString().trim();
+                String nombreTexto = nombre.getText().toString().trim();
 
-                if(mensaje.length()== 0)
+                if(mensajeTexto.isEmpty()) {
+                    Toast.makeText(Segunda.this, "Escribe un mensaje", Toast.LENGTH_SHORT).show();
                     return;
+                }
+
+                if(nombreTexto.isEmpty()) {
+                    nombreTexto = "Yo"; // Valor por defecto
+                }
+
                 MensajeVO mMensajeVO = new MensajeVO();
-                mMensajeVO.setMensaje(mensaje.getText().toString());
-                mMensajeVO.setNombre(nombre.getText().toString());
-                FirebaseFirestore.getInstance().collection("chat").add(mMensajeVO);
-                mensaje.setText("");
+                mMensajeVO.setMensaje(mensajeTexto);
+                mMensajeVO.setNombre(nombreTexto);
+
+                FirebaseFirestore.getInstance().collection("chat")
+                        .add(mMensajeVO)
+                        .addOnSuccessListener(documentReference -> {
+                            mensaje.setText(""); // Limpia el campo
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(Segunda.this, "Error al enviar: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        });
             }
         });
 

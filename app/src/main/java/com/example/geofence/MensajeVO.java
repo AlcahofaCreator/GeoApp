@@ -5,6 +5,8 @@ public class MensajeVO {
     private String nombre;
     private String mensaje;
 
+    public MensajeVO() {}
+
     public String getNombre() {
         return nombre;
     }
