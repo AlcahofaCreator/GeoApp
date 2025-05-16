@@ -6,20 +6,118 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
+    android:background="@color/white"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <androidx.fragment.app.FragmentContainerView
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:id="@+id/map"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="85dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/border_background"
+            android:orientation="horizontal">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="33sp"
+                android:textStyle="bold"
+                android:layout_marginStart="29dp"
+                android:text="MAPA">
+            </TextView>
 
-    </FrameLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
+            <ImageView
+                android:id="@+id/imagenBoton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/user"
+                android:clickable="true"
+                android:focusable="true"
+                android:scaleType="fitCenter"
+                android:layout_marginEnd="35dp"
+                android:adjustViewBounds="true">
+            </ImageView>
+
+            <ImageView
+                android:id="@+id/imagenBoton2"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/settings"
+                android:clickable="true"
+                android:focusable="true"
+                android:scaleType="fitCenter"
+                android:layout_marginEnd="35dp"
+                android:adjustViewBounds="true">
+            </ImageView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="630dp"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:gravity="center"
+            android:background="@drawable/border_background"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imagenBoton3"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/location"
+                android:clickable="true"
+                android:focusable="true"
+                android:scaleType="fitCenter"
+                android:layout_marginStart="100dp"
+                android:adjustViewBounds="true">
+            </ImageView>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/imagenBoton4"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/comment"
+                android:clickable="true"
+                android:focusable="true"
+                android:scaleType="fitCenter"
+                android:layout_marginEnd="100dp"
+                android:adjustViewBounds="true">
+            </ImageView>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>
