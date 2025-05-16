@@ -1,5 +1,7 @@
 package com.example.geofence;
 
+import static android.content.ContentValues.TAG;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -49,11 +51,20 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener {
 
@@ -63,10 +74,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle currentGeofenceCircle;
     private GoogleMap map;
-
-    public int radio = 100;
-
+    public int radio = 30000;
     private List<Geofence> geofenceList = new ArrayList<>();
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +155,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                     Toast.LENGTH_SHORT).show();
                                         });
                             }
+
+                            if (user != null) {
+                                String uid = user.getUid(); // ID único del usuario
+
+                                // Actualizar (o crear) el documento del usuario
+                                db.collection("usuarios").document(uid)
+                                        .set(new HashMap<String, Object>() {{
+                                            put("lat", latitude);
+                                            put("long", longitude);
+                                        }}, SetOptions.merge())
+                                        .addOnSuccessListener(aVoid -> Log.d("Firestore", "Actualizado correctamente"))
+                                        .addOnFailureListener(e -> Log.e("Firestore", "Error: " + e.getMessage()));
+                            }
+
                         } else {
 
                             Toast.makeText(
@@ -374,6 +399,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         enableMyLocation();
         getDeviceLocationAndMoveCamera();
+        actualizarLocalizaciones();
 
     }
 
@@ -459,4 +485,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(28.5, -103), 5));
         }
     }
+
+    private void actualizarLocalizaciones(){
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("usuarios")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Double lat = doc.getDouble("lat");
+                        Double lng = doc.getDouble("long");
+
+                        if (lat != null && lng != null) {
+                            LatLng pos = new LatLng(lat, lng);
+                            map.addMarker(new MarkerOptions()
+                                    .position(pos)
+                                    .title("Usuario: " + doc.getId())); // Puedes cambiar el texto
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener usuarios: " + e.getMessage()));
+
+    }
+
 }
