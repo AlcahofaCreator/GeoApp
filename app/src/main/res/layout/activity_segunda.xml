@@ -5,8 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/white"
+    android:orientation="vertical"
     tools:context=".Segunda">
 
     <LinearLayout
@@ -17,100 +17,120 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="85dp"
-            android:gravity="center_vertical"
             android:background="@drawable/border_background"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="33sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
                 android:layout_marginStart="29dp"
-                android:text="CHATS">
-            </TextView>
+                android:text="CHATS"
+                android:textColor="@color/black"
+                android:textSize="33sp"
+                android:textStyle="bold"/>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Nombre"
+                android:id="@+id/nombre"
+                android:textSize="20sp"
+                android:layout_margin="20dp"/>
 
             <ImageView
                 android:id="@+id/imagenBoton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/user"
+                android:layout_marginEnd="35dp"
+                android:adjustViewBounds="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:scaleType="fitCenter"
-                android:layout_marginEnd="35dp"
-                android:adjustViewBounds="true">
-            </ImageView>
+                android:src="@drawable/user"/>
 
             <ImageView
                 android:id="@+id/imagenBoton2"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/settings"
+                android:layout_marginEnd="35dp"
+                android:adjustViewBounds="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:scaleType="fitCenter"
-                android:layout_marginEnd="35dp"
-                android:adjustViewBounds="true">
-            </ImageView>
+                android:src="@drawable/settings"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="630dp"
-            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:gravity="top"
             android:orientation="vertical">
 
-            <ListView
-                android:id="@+id/LV"
+            <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
-                android:layout_height="400dp">
-            </ListView>
+                android:layout_height="464dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left">
+
+                <EditText
+                    android:id="@+id/mensaje"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:ems="15"
+                    android:inputType="text"
+                    android:text="Mensaje" />
+
+                <ImageButton
+                    android:id="@+id/send"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+
+                    app:srcCompat="@android:drawable/ic_menu_send" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="85dp"
-            android:gravity="center"
+            android:layout_height="wrap_content"
             android:background="@drawable/border_background"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/location"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/location"
+                android:layout_marginStart="100dp"
+                android:adjustViewBounds="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:scaleType="fitCenter"
-                android:layout_marginStart="100dp"
-                android:adjustViewBounds="true">
-            </ImageView>
+                android:src="@drawable/location"/>
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:layout_margin="95dp"/>
 
             <ImageView
                 android:id="@+id/chats"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/comment"
+                android:layout_marginEnd="100dp"
+                android:adjustViewBounds="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:scaleType="fitCenter"
-                android:layout_marginEnd="100dp"
-                android:adjustViewBounds="true">
-            </ImageView>
+                android:src="@drawable/comment"/>
 
         </LinearLayout>
 
