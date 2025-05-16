@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 String uid = user.getUid(); // ID único del usuario
 
                                 // Actualizar (o crear) el documento del usuario
-                                db.collection("usuarios").document(uid)
+                                db.collection("ubicaciones").document(uid)
                                         .set(new HashMap<String, Object>() {{
                                             put("lat", latitude);
                                             put("long", longitude);
@@ -503,7 +503,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String myUid = currentUser != null ? currentUser.getUid() : "";
 
-        db.collection("usuarios")
+        db.collection("ubicaciones")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
