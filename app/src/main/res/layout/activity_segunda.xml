@@ -70,6 +70,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
+                android:id="@+id/rvMensajes"
                 android:layout_height="464dp" />
 
             <LinearLayout

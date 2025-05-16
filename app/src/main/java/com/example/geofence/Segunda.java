@@ -56,6 +56,8 @@ public class Segunda extends AppCompatActivity {
         mensaje = findViewById(R.id.mensaje);
         send = findViewById(R.id.send);
 
+        rVmensajes.findViewById(R.id.rvMensajes);
+
         rVmensajes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rVmensajes.setAdapter(mAdapterRVMensajes);
         rVmensajes.setHasFixedSize(true);
