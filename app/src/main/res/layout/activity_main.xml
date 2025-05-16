@@ -26,6 +26,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="33sp"
                 android:textStyle="bold"
+                android:textColor="@color/black"
                 android:layout_marginStart="29dp"
                 android:text="MAPA">
             </TextView>
