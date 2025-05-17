@@ -140,10 +140,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void run() {
                 actualizarLocalizaciones(); // también actualiza ubicación del usuario y su círculo
-                handler.postDelayed(this, 6000); // puedes subir a 60000 (1 min) para producción
+                handler.postDelayed(this, 60000); // puedes subir a 60000 (1 min) para producción
             }
         };
-        handler.postDelayed(actualizar, 6000);
+        handler.postDelayed(actualizar, 60000);
     }
 
     private void actualizarLocalizaciones() {
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private PendingIntent getGeofencePendingIntent() {
-        Intent intent = new Intent(this, MainActivity.GeofenceBroadcastReceiver.class);
+        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class); // ya no es interna
         return PendingIntent.getBroadcast(
                 this,
                 0,
@@ -327,62 +327,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }, getMainLooper());
-    }
-
-    public static class GeofenceBroadcastReceiver extends BroadcastReceiver {
-        private static final String CHANNEL_ID = "geofence_channel";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-
-            if (geofencingEvent == null || geofencingEvent.hasError()) {
-                int errorCode = geofencingEvent != null ? geofencingEvent.getErrorCode() : -1;
-                Log.e("GeofenceReceiver", "Error en evento de geovalla. Código: " + errorCode);
-                return;
-            }
-
-            int transitionType = geofencingEvent.getGeofenceTransition();
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
-            for (Geofence geofence : triggeringGeofences) {
-                String requestId = geofence.getRequestId();
-
-                if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    String userId = requestId.replace("user_", "");
-                    sendNotification(context, "📍 Entraste en la geovalla de " + userId);
-                } else if (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                    String userId = requestId.replace("user_", "");
-                    sendNotification(context, "🚪 Saliste de la geovalla de " + userId);
-                }
-            }
-        }
-
-        private void sendNotification(Context context, String message) {
-            createNotificationChannel(context);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.ic_dialog_map)
-                    .setContentTitle("Geovalla")
-                    .setContentText(message)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(true);
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                notificationManager.notify((int) System.currentTimeMillis(), builder.build());
-            }
-        }
-
-        private void createNotificationChannel(Context context) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Geofence Channel", NotificationManager.IMPORTANCE_HIGH);
-                NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-                if (notificationManager != null) {
-                    notificationManager.createNotificationChannel(channel);
-                }
-            }
-        }
     }
 
     @Override
