@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             geofenceList.clear();
 
             for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                Log.d("Geofence", "📄 Documento leído: " + doc.getId() + " => " + doc.getData());
                 String userId = doc.getId();
                 if (userId.equals(myUid)) continue;
 
@@ -197,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Double lng = doc.getDouble("long");
 
                 if (lat != null && lng != null) {
+                    Log.d("Geofence", "📌 Coordenadas válidas para " + userId + ": " + lat + ", " + lng);
                     usuariosActuales.add(userId);
                     LatLng pos = new LatLng(lat, lng);
 
@@ -215,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             } else {
                                 Marker nuevoMarker = map.addMarker(new MarkerOptions()
                                         .position(pos)
-                                        .title("Usuario: " + userId));
+                                        .title("Usuario: " + doc.getString("nombre")));
                                 marcadoresPorUsuario.put(userId, nuevoMarker);
                             }
                         } else {
@@ -232,9 +234,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .setRequestId("user_" + userId)
                             .setCircularRegion(lat, lng, radio)
                             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                            .setLoiteringDelay(10000) // 10 segundos para activar DWELL
+                            .setTransitionTypes(
+                                    Geofence.GEOFENCE_TRANSITION_ENTER |
+                                            Geofence.GEOFENCE_TRANSITION_EXIT |
+                                            Geofence.GEOFENCE_TRANSITION_DWELL
+                            )
                             .build();
-                    geofenceList.add(valla);
+
+                    geofenceList.add(valla); // 👈 AGREGA ESTO
+
                 }
             }
 
@@ -254,11 +263,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .addOnSuccessListener(unused -> {
                             Log.d("Geofence", "Geovallas anteriores eliminadas");
 
-                            geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-                                    .addOnSuccessListener(aVoid ->
-                                            Log.d("Geofence", "Nuevas geovallas registradas"))
-                                    .addOnFailureListener(e ->
-                                            Log.e("Geofence", "Error al registrar nuevas geovallas: " + e.getMessage()));
+                            if (!geofenceList.isEmpty()) {
+                                geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d("Geofence", "Nuevas geovallas registradas");
+
+                                            // 🔁 Simular evento DWELL si ya estás dentro de alguna
+                                            new Handler().postDelayed(() -> {
+                                                for (Geofence geo : geofenceList) {
+                                                    float[] distancia = new float[1];
+                                                    Location.distanceBetween(
+                                                            miUbicacionActual.getLatitude(), miUbicacionActual.getLongitude(),
+                                                            geo.getLatitude(), geo.getLongitude(),
+                                                            distancia
+                                                    );
+                                                    if (distancia[0] <= geo.getRadius()) {
+                                                        Log.d("Geofence", "🔁 Simulando DWELL en: " + geo.getRequestId());
+
+                                                        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+                                                        intent.setAction("com.example.geofence.SIMULATED_DWELL");
+                                                        sendBroadcast(intent);
+                                                    }
+                                                }
+                                            }, 11000); // loiteringDelay + margen
+                                        })
+                                        .addOnFailureListener(e -> Log.e("Geofence", "Error al registrar nuevas geovallas: " + e.getMessage()));
+                            } else {
+                                Log.w("Geofence", "⚠️ No se agregaron geovallas porque la lista está vacía");
+                            }
+
                         })
                         .addOnFailureListener(e ->
                                 Log.e("Geofence", "Error al eliminar geovallas: " + e.getMessage()));
@@ -268,7 +301,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.setInitialTrigger(
+                GeofencingRequest.INITIAL_TRIGGER_ENTER |
+                        GeofencingRequest.INITIAL_TRIGGER_DWELL
+        );
         builder.addGeofences(geofenceList);
         return builder.build();
     }

@@ -21,11 +21,17 @@ import com.google.android.gms.location.GeofencingEvent;
 import java.util.List;
 
 public class GeofenceBroadcastReceiver extends BroadcastReceiver {
+
     private static final String CHANNEL_ID = "geofence_channel";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("GeofenceReceiver", "✅ Intent recibido: " + intent);
+
+        if ("com.example.geofence.SIMULATED_DWELL".equals(intent.getAction())) {
+            Log.d("GeofenceReceiver", "🔁 Procesando DWELL simulado");
+            return;
+        }
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 
@@ -54,6 +60,8 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 sendNotification(context, "📍 Entraste en la geovalla de " + userId);
             } else if (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 sendNotification(context, "🚪 Saliste de la geovalla de " + userId);
+            } else if (transitionType == Geofence.GEOFENCE_TRANSITION_DWELL) {
+                sendNotification(context, "🕒 Permaneces en la geovalla de " + userId);
             } else {
                 Log.w("GeofenceReceiver", "⚠️ Tipo de transición desconocido: " + transitionType);
             }
