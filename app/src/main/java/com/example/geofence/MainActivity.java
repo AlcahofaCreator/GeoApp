@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         handler.postDelayed(actualizar, 60000);
     }
 
+
     private void actualizarLocalizaciones() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String myUid = currentUser != null ? currentUser.getUid() : "";
