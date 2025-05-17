@@ -85,7 +85,8 @@
                     android:layout_gravity="center"
                     android:ems="15"
                     android:inputType="text"
-                    android:text="Mensaje" />
+                    android:hint="Mensaje"
+                    android:textColor="@color/black"/>
 
                 <ImageButton
                     android:id="@+id/send"

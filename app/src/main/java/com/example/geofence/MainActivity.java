@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         chats = findViewById(R.id.chats);
-        chats.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, Segunda.class)));
+        chats.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ListaChats.class)));
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;

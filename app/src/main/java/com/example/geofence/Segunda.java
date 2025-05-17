@@ -47,81 +47,92 @@ public class Segunda extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_segunda);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        location = findViewById(R.id.location);
+        // Recibir datos
+        String nombreChat = getIntent().getStringExtra("nombreChat");   // receptor
+        String miNombre = getIntent().getStringExtra("miNombre");       // yo
 
+        // Referencias UI
+        location = findViewById(R.id.location);
         nombre = findViewById(R.id.nombre);
         mensaje = findViewById(R.id.mensaje);
         send = findViewById(R.id.send);
-
         rVmensajes = findViewById(R.id.rvMensajes);
+
+        nombre.setText(nombreChat); // Mostrar con quién se está chateando
 
         rVmensajes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rVmensajes.setAdapter(mAdapterRVMensajes);
         rVmensajes.setHasFixedSize(true);
 
+        // Escuchar mensajes en tiempo real
         FirebaseFirestore.getInstance().collection("chat")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots,
                                         @Nullable FirebaseFirestoreException error) {
 
-                        // 1. Primero verifica si hay error
                         if (error != null) {
                             Log.e("Firestore error", error.getMessage());
                             return;
                         }
 
-                        // 2. Luego verifica si queryDocumentSnapshots es null
                         if (queryDocumentSnapshots == null) {
                             Log.d("Firestore", "No hay documentos");
                             return;
                         }
 
-                        // 3. Solo entonces procesa los cambios
                         for (DocumentChange mDocumentChange : queryDocumentSnapshots.getDocumentChanges()) {
                             if (mDocumentChange.getType() == DocumentChange.Type.ADDED) {
-                                lstMensajes.add(mDocumentChange.getDocument().toObject(MensajeVO.class));
-                                mAdapterRVMensajes.notifyDataSetChanged();
-                                rVmensajes.smoothScrollToPosition(lstMensajes.size());
+                                MensajeVO msg = mDocumentChange.getDocument().toObject(MensajeVO.class);
+
+                                String origen = msg.getOrigen();
+                                String destino = msg.getDestino();
+
+                                if (origen == null || destino == null || miNombre == null || nombreChat == null) {
+                                    Log.w("MENSAJE_INVALIDO", "Mensaje ignorado por campos nulos");
+                                    continue;
+                                }
+
+                                boolean esParaMi = destino.equals(miNombre) && origen.equals(nombreChat);
+                                boolean esMio = origen.equals(miNombre) && destino.equals(nombreChat);
+
+                                if (esParaMi || esMio) {
+                                    lstMensajes.add(msg);
+                                    mAdapterRVMensajes.notifyDataSetChanged();
+                                    rVmensajes.smoothScrollToPosition(lstMensajes.size());
+                                }
                             }
                         }
                     }
                 });
 
+        // Enviar mensaje
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String mensajeTexto = mensaje.getText().toString().trim();
-                String nombreTexto = nombre.getText().toString().trim();
 
-                if(mensajeTexto.isEmpty()) {
+                if (mensajeTexto.isEmpty()) {
                     Toast.makeText(Segunda.this, "Escribe un mensaje", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if(nombreTexto.isEmpty()) {
-                    nombreTexto = "Yo"; // Valor por defecto
-                }
-
                 MensajeVO mMensajeVO = new MensajeVO();
                 mMensajeVO.setMensaje(mensajeTexto);
-                mMensajeVO.setNombre(nombreTexto);
+                mMensajeVO.setOrigen(miNombre);
+                mMensajeVO.setDestino(nombreChat);
 
                 FirebaseFirestore.getInstance().collection("chat")
                         .add(mMensajeVO)
-                        .addOnSuccessListener(documentReference -> {
-                            mensaje.setText(""); // Limpia el campo
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(Segunda.this, "Error al enviar: " + e.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        });
+                        .addOnSuccessListener(documentReference -> mensaje.setText(""))
+                        .addOnFailureListener(e -> Toast.makeText(Segunda.this, "Error al enviar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
 
