@@ -99,19 +99,20 @@ public class ListaChats extends AppCompatActivity {
                         for (DocumentChange mDocumentChange : queryDocumentSnapshots.getDocumentChanges()) {
                             if (mDocumentChange.getType() == DocumentChange.Type.ADDED) {
                                 ChatVO chat = mDocumentChange.getDocument().toObject(ChatVO.class);
-
-                                // Obtener el ID del documento (que es el UID del usuario)
-                                String docId = mDocumentChange.getDocument().getId();
-                                chat.setId(docId); // ahora sí tiene el campo ID
+                                String docId = mDocumentChange.getDocument().getId(); // UID del usuario
+                                chat.setId(docId);
 
                                 if (docId.equals(myUid)) {
-                                    miNombre[0] = chat.getNombre(); // guardar mi nombre real
-                                    continue; // no me muestro en la lista
+                                    miNombre[0] = chat.getNombre(); // guardar tu propio nombre
+                                    continue;
                                 }
 
-                                lstChats.add(chat);
-                                mAdapterRVChats.notifyDataSetChanged();
-                                rVchats.smoothScrollToPosition(lstChats.size());
+                                // ✅ Solo mostrar si está dentro de la geovalla
+                                if (MainActivity.usuariosDentroDeGeovalla.contains(docId)) {
+                                    lstChats.add(chat);
+                                    mAdapterRVChats.notifyDataSetChanged();
+                                    rVchats.smoothScrollToPosition(lstChats.size());
+                                }
                             }
                         }
                     }

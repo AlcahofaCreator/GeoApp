@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final List<Circle> circulosVisibles = new ArrayList<>();
     private Circle miCirculoPersonal;
     private final Map<String, Marker> marcadoresPorUsuario = new HashMap<>();
+    public static final Set<String> usuariosDentroDeGeovalla = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String myUid = currentUser != null ? currentUser.getUid() : "";
 
+        usuariosDentroDeGeovalla.clear(); // 🧼 Limpiar la lista antes de poblarla
+
         // 🟢 Actualizar ubicación propia y círculo
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
@@ -184,13 +187,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             });
         }
 
-        // 🔁 Leer todos los usuarios
+        // 🔁 Leer todos los usuarios y actualizar geovallas
         db.collection("ubicaciones").get().addOnSuccessListener(queryDocumentSnapshots -> {
             Set<String> usuariosActuales = new HashSet<>();
             geofenceList.clear();
 
             for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                Log.d("Geofence", "📄 Documento leído: " + doc.getId() + " => " + doc.getData());
                 String userId = doc.getId();
                 if (userId.equals(myUid)) continue;
 
@@ -198,10 +200,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Double lng = doc.getDouble("long");
 
                 if (lat != null && lng != null) {
-                    Log.d("Geofence", "📌 Coordenadas válidas para " + userId + ": " + lat + ", " + lng);
                     usuariosActuales.add(userId);
                     LatLng pos = new LatLng(lat, lng);
 
+                    // 🧠 Verifica si está dentro de mi radio y lo guarda
                     if (miUbicacionActual != null) {
                         float[] distancia = new float[1];
                         Location.distanceBetween(
@@ -211,6 +213,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         );
 
                         if (distancia[0] <= radio) {
+                            usuariosDentroDeGeovalla.add(userId); // ✅ Agregado al set visible
+
                             // 📍 Mostrar o mover marcador
                             if (marcadoresPorUsuario.containsKey(userId)) {
                                 marcadoresPorUsuario.get(userId).setPosition(pos);
@@ -221,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 marcadoresPorUsuario.put(userId, nuevoMarker);
                             }
                         } else {
-                            // ❌ Eliminar marcador si se sale
+                            // ❌ Eliminar marcador si está fuera
                             if (marcadoresPorUsuario.containsKey(userId)) {
                                 marcadoresPorUsuario.get(userId).remove();
                                 marcadoresPorUsuario.remove(userId);
@@ -229,12 +233,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
 
-                    // 📡 Agregar geovalla de ese usuario
+                    // 📡 Crear geovalla para ese usuario
                     Geofence valla = new Geofence.Builder()
                             .setRequestId("user_" + userId)
                             .setCircularRegion(lat, lng, radio)
                             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                            .setLoiteringDelay(10000) // 10 segundos para activar DWELL
+                            .setLoiteringDelay(10000)
                             .setTransitionTypes(
                                     Geofence.GEOFENCE_TRANSITION_ENTER |
                                             Geofence.GEOFENCE_TRANSITION_EXIT |
@@ -242,8 +246,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             )
                             .build();
 
-                    geofenceList.add(valla); // 👈 AGREGA ESTO
-
+                    geofenceList.add(valla);
                 }
             }
 
@@ -257,18 +260,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
 
-            // 🔁 Eliminar geovallas anteriores antes de agregar nuevas
+            // 🔁 Reemplazar geovallas
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 geofencingClient.removeGeofences(getGeofencePendingIntent())
                         .addOnSuccessListener(unused -> {
-                            Log.d("Geofence", "Geovallas anteriores eliminadas");
-
                             if (!geofenceList.isEmpty()) {
                                 geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
                                         .addOnSuccessListener(aVoid -> {
-                                            Log.d("Geofence", "Nuevas geovallas registradas");
-
-                                            // 🔁 Simular evento DWELL si ya estás dentro de alguna
+                                            // 🔁 Simular DWELL para los que ya estás dentro
                                             new Handler().postDelayed(() -> {
                                                 for (Geofence geo : geofenceList) {
                                                     float[] distancia = new float[1];
@@ -279,22 +278,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                     );
                                                     if (distancia[0] <= geo.getRadius()) {
                                                         Log.d("Geofence", "🔁 Simulando DWELL en: " + geo.getRequestId());
-
                                                         Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
                                                         intent.setAction("com.example.geofence.SIMULATED_DWELL");
                                                         sendBroadcast(intent);
                                                     }
                                                 }
-                                            }, 11000); // loiteringDelay + margen
+                                            }, 11000);
                                         })
-                                        .addOnFailureListener(e -> Log.e("Geofence", "Error al registrar nuevas geovallas: " + e.getMessage()));
-                            } else {
-                                Log.w("Geofence", "⚠️ No se agregaron geovallas porque la lista está vacía");
+                                        .addOnFailureListener(e -> Log.e("Geofence", "❌ No se agregaron nuevas geovallas: " + e.getMessage()));
                             }
-
                         })
-                        .addOnFailureListener(e ->
-                                Log.e("Geofence", "Error al eliminar geovallas: " + e.getMessage()));
+                        .addOnFailureListener(e -> Log.e("Geofence", "❌ Fallo al eliminar geovallas: " + e.getMessage()));
             }
         });
     }

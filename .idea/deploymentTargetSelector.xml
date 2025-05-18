@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-05-18T00:02:15.087307500Z">
+        <DropdownSelection timestamp="2025-05-18T01:15:19.653900700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\axomi\.android\avd\cel_con_play_services.avd" />
