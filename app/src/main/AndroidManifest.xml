@@ -23,7 +23,9 @@
             android:exported="false" />
         <activity
             android:name=".Segunda"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true" />

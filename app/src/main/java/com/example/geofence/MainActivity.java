@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle currentGeofenceCircle;
     private GoogleMap map;
-    public int radio = 30000;
+    public int radio = 15000;
     private List<Geofence> geofenceList = new ArrayList<>();
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     FirebaseFirestore db = FirebaseFirestore.getInstance();

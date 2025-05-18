@@ -39,9 +39,6 @@ public class Segunda extends AppCompatActivity {
     private TextView nombre;
     private List<MensajeVO> lstMensajes = new ArrayList<>();
 
-    private AdapterRVMensajes mAdapterRVMensajes = new AdapterRVMensajes(lstMensajes);
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +63,8 @@ public class Segunda extends AppCompatActivity {
         rVmensajes = findViewById(R.id.rvMensajes);
 
         nombre.setText(nombreChat); // Mostrar con quién se está chateando
+
+        AdapterRVMensajes mAdapterRVMensajes = new AdapterRVMensajes(lstMensajes, miNombre);
 
         rVmensajes.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rVmensajes.setAdapter(mAdapterRVMensajes);

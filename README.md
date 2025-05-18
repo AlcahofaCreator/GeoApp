@@ -158,5 +158,7 @@ implementation 'androidx.core:core-ktx:1.12.0'
 ```
 ## Authors
 
+- [@LeonardoMaximiliano](https://github.com/LeonardoMaximiliano)
 - [@AlcachofaK](https://github.com/AlcahofaCreator)
+- [@IvanchitorJR](https://github.com/IvanchitorJR)
 
