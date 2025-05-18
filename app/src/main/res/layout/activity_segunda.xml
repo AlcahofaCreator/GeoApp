@@ -24,19 +24,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="29dp"
-                android:text="CHATS"
-                android:textColor="@color/black"
-                android:textSize="33sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:hint="Nombre"
                 android:textColor="@color/black"
                 android:id="@+id/nombre"
-                android:textSize="20sp"
+                android:textSize="28sp"
                 android:layout_margin="20dp"/>
 
             <View
@@ -90,18 +81,20 @@
                     android:layout_width="230dp"
                     android:layout_height="40dp"
                     android:layout_gravity="center"
-                    android:paddingLeft="6dp"
+                    android:paddingLeft="8dp"
                     android:ems="15"
                     android:inputType="text"
+                    android:background="@drawable/rounded_edittext"
                     android:hint="Mensaje"
+                    android:textColorHint="@color/gray"
                     android:textColor="@color/black"/>
 
                 <ImageButton
                     android:id="@+id/send"
-                    android:layout_width="90dp"
-                    android:layout_height="90dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
                     android:layout_gravity="center"
-                    app:srcCompat="@android:drawable/ic_menu_send" />
+                    android:src="@drawable/send" />
 
             </LinearLayout>
 
