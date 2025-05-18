@@ -105,6 +105,7 @@ public class Segunda extends AppCompatActivity {
 
                                 if (esParaMi || esMio) {
                                     lstMensajes.add(msg);
+                                    lstMensajes.sort((a, b) -> Integer.compare(a.getNumeroMensaje(), b.getNumeroMensaje()));
                                     mAdapterRVMensajes.notifyDataSetChanged();
                                     rVmensajes.smoothScrollToPosition(lstMensajes.size());
                                 }
@@ -124,15 +125,44 @@ public class Segunda extends AppCompatActivity {
                     return;
                 }
 
-                MensajeVO mMensajeVO = new MensajeVO();
-                mMensajeVO.setMensaje(mensajeTexto);
-                mMensajeVO.setOrigen(miNombre);
-                mMensajeVO.setDestino(nombreChat);
-
+                // Obtener el número de mensaje más alto entre esos dos usuarios
                 FirebaseFirestore.getInstance().collection("chat")
-                        .add(mMensajeVO)
-                        .addOnSuccessListener(documentReference -> mensaje.setText(""))
-                        .addOnFailureListener(e -> Toast.makeText(Segunda.this, "Error al enviar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        .whereEqualTo("origen", miNombre)
+                        .whereEqualTo("destino", nombreChat)
+                        .get()
+                        .addOnSuccessListener(querySnapshot1 -> {
+                            FirebaseFirestore.getInstance().collection("chat")
+                                    .whereEqualTo("origen", nombreChat)
+                                    .whereEqualTo("destino", miNombre)
+                                    .get()
+                                    .addOnSuccessListener(querySnapshot2 -> {
+
+                                        int maxNumero = 0;
+
+                                        for (MensajeVO m : querySnapshot1.toObjects(MensajeVO.class)) {
+                                            if (m.getNumeroMensaje() > maxNumero) {
+                                                maxNumero = m.getNumeroMensaje();
+                                            }
+                                        }
+
+                                        for (MensajeVO m : querySnapshot2.toObjects(MensajeVO.class)) {
+                                            if (m.getNumeroMensaje() > maxNumero) {
+                                                maxNumero = m.getNumeroMensaje();
+                                            }
+                                        }
+
+                                        MensajeVO mMensajeVO = new MensajeVO();
+                                        mMensajeVO.setMensaje(mensajeTexto);
+                                        mMensajeVO.setOrigen(miNombre);
+                                        mMensajeVO.setDestino(nombreChat);
+                                        mMensajeVO.setNumeroMensaje(maxNumero + 1);
+
+                                        FirebaseFirestore.getInstance().collection("chat")
+                                                .add(mMensajeVO)
+                                                .addOnSuccessListener(documentReference -> mensaje.setText(""))
+                                                .addOnFailureListener(e -> Toast.makeText(Segunda.this, "Error al enviar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                    });
+                        });
             }
         });
 
