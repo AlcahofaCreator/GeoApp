@@ -93,15 +93,8 @@
                     android:paddingLeft="6dp"
                     android:ems="15"
                     android:inputType="text"
-                    android:textColorHint="@color/gray"
-                    android:textColor="@color/black"
-                    android:background="@drawable/rounded_edittext"
-                    android:hint="Mensaje" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
+                    android:hint="Mensaje"
+                    android:textColor="@color/black"/>
 
                 <ImageButton
                     android:id="@+id/send"
